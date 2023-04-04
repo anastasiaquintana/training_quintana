@@ -21,13 +21,90 @@ library(lubridate)
 
 ## Load in data
 
-```{r}
+```{r read in data}
 
-birds_1 <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-cap.256.10&entityid=53edaa7a0e083013d9bf20322db1780e")
-sites_1 <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-cap.256.10&entityid=b2466fa5cb5ed7ee1ea91398fc291c59")
-surveys_1 <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-cap.256.10&entityid=81bf72420e69077097fb0790dcdc63a6")
-taxalist_1 <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-cap.256.10&entityid=58f863b7e3066e68536a9cacdc7bd58e")
+bird_observations <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-cap.256.10&entityid=53edaa7a0e083013d9bf20322db1780e")
+surveys <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-cap.256.10&entityid=b2466fa5cb5ed7ee1ea91398fc291c59")
+sites <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-cap.256.10&entityid=81bf72420e69077097fb0790dcdc63a6")
+taxalist <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-cap.256.10&entityid=58f863b7e3066e68536a9cacdc7bd58e")
+
+head(bird_observations)
+head(sites)
+head(surveys)
+head(taxalist)
+
+colnames(bird_observations)
+colnames(sites)
+colnames(surveys)
+colnames(taxalist)
 
 ```
 
+## Create birds subset
+
+```{r}
+
+birds_subset <- bird_observations %>% 
+  filter(species_id %in% c("BHCO", "RWBL")) %>% 
+  filter(site_id %in% c("LI-W", "NU-C"))
+
+head(birds_subset)
+
+colnames(birds_subset)
+colnames(sites)
+
+```
+
+## Joining birds subset with sites
+
+```{r join birds, warning=FALSE}
+
+## Left join
+
+birds_left <- birds_subset %>% 
+  left_join(y = sites, by = "site_id")
+
+head(birds_left)
+
+## Full join
+
+birds_full <- birds_subset %>% 
+  full_join(y = sites, by = "site_id")
+
+head(birds_full)
+colnames(birds_full)
+
+## Inner join
+
+birds_inner <- birds_subset %>% 
+  inner_join(y = taxalist, by = "species_id")
+
+colnames(birds_inner)
+head(birds_inner)
+
+```
+
+## Renaming notes for data wrangling
+
+```{r}
+
+bird_observations <- bird_observations %>% 
+  rename(bird_obs_notes = notes)
+
+```
+
+## SUPERSET
+
+```{r}
+
+superset <- bird_observations %>% 
+  full_join(y = taxalist, by = "species_id") %>% 
+  full_join(y = sites, by = "site_id") %>% 
+  full_join(y = surveys, by = c("site_id", "survey_id")) %>%  
+  select(survey_date, common_name, park_name, bird_count, observer)
+  
+colnames(surveys)
+
+
+```
 
