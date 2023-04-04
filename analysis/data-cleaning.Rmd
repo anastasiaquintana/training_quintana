@@ -109,9 +109,84 @@ head(catch_clean)
 
 ## Reshape data
 
+From wide to long
+
+```{r wide to long}
+
+catch_long <- catch_clean %>% 
+  pivot_longer(cols = -c(Region, Year),
+               names_to = "species",
+               values_to = "catch")
+
+head(catch_long)
+
+```
+
+From long to wide
+
+```{r long to wide}
+
+catch_wide <- catch_long %>% 
+  pivot_wider(names_from = species, 
+              values_from = catch)
+
+head(catch_wide)
+
+```
+
+## Renaming column
+
 ```{r}
 
+catch_long <- catch_long %>% 
+  rename(catch_thousands = catch)
 
+colnames(catch_long)
+
+```
+
+## Add a column using `mutate()`
+
+```{r}
+
+catch_long <- catch_long %>% 
+  mutate(catch = catch_thousands*1000)
+
+head(catch_long)
+
+
+```
+
+
+## Group by region
+
+```{r}
+
+mean_region <- catch_long %>% 
+  group_by(Region) %>% 
+  summarize(catch_mean = mean(catch))
+
+head(mean_region)
+
+n_region <- catch_long %>% 
+  group_by(Region) %>% 
+  summarize(abs_n = n())
+
+head(n_region)
+
+```
+
+
+## Filtering by rows with `filter()`
+
+```{r}
+
+unique(catch_long$Region)
+
+sse_catch <- catch_long %>% 
+  filter(Region == "SSE")
+
+head(sse_catch)
 
 
 ```
