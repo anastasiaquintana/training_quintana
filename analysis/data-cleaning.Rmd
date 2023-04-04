@@ -48,9 +48,71 @@ sort(unique(catch_original$Region))
 
 ```
 
-
 # Clean and reshape data
 
-## Remove columns
+## Selecting and removing columns with `select()`
+
+```{r select}
+
+catch_data <- catch_original %>% 
+  select(Region, Year, Chinook, Sockeye, Coho, Pink, Chum)
+
+head(catch_data)
+
+```
+
 ## Check column types
+
+```{r checking}
+
+glimpse(catch_data)
+
+```
+
+## Changing column types using mutate
+
+```{r changing column types}
+
+catch_clean <- catch_data %>%
+  mutate(Chinook = as.numeric(Chinook))
+
+head(catch_clean)
+
+```
+
+## Checking NA
+
+```{r}
+
+i <- which(is.na(catch_clean$Chinook))
+
+catch_data[i,]
+
+```
+
+## Fixing Chinook column
+
+```{r}
+catch_clean <- catch_data %>% 
+  mutate(Chinook = if_else(Chinook == "I", 
+                           "1",
+                           Chinook),
+         Chinook = as.numeric(Chinook))
+
+## Check
+catch_clean[i,]
+
+head(catch_clean)
+
+```
+
+
 ## Reshape data
+
+```{r}
+
+
+
+
+```
+
