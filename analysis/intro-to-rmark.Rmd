@@ -1,0 +1,59 @@
+---
+title: "Introduction to RMarkdown"
+author: "Tasha Quintana"
+date: "2023-04-03"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+bibliography: references.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Tasha's example RMarkdown
+
+Camila is *awesome*. Indeed she is awesomeness^2^. Subscripts are~sick~
+
+Strikethroughs are also ~~awesome~~. It's a great idea to have a link to my [website](https://anastasiaquintana.com/)
+
+------------------------------------------------------------------------
+
+## Second section
+
+This is the second section.
+
+## Adding citations
+
+Feedback loops are serious things [@quintana2021].
+
+And Baja is a great place to study them [@quintana2021]
+
+## Adding tables
+
+| Veggie options   | Meat options         |
+|------------------|----------------------|
+| veggie burger    | weird meats          |
+
+# R Code Chunk 1
+
+```{r example}
+
+heights_ft <- c(5.4, 5.4, 5.9)
+
+coef <- 3.14
+
+```
+
+## Exercise new chunk
+
+```{r friends}
+
+names_friends <- c("Claire", "Liz", "Janet")
+
+heights_friends <- c(5.3, 5.3, 5.2)
+
+```
+

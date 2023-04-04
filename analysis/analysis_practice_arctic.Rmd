@@ -1,0 +1,43 @@
+---
+title: "Practice Analysis"
+author: "Tasha Quintana"
+date: "2023-04-03"
+output: html_document
+  toc: true
+  toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+Read in data
+
+```{r}
+
+```
+
+# Analysis
+
+Calculate summary statistics
+
+```{r}
+
+```
+
+Calculate mean Redfield ratio
+
+```{r}
+
+```
+
+Plot Redfield ratio
+
+```{r}
+
+```
+
+
+# Conclusion
