@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Lessons
 
 - [Intro to Rmd](analysis/intro-to-rmark.html)
-- Cleaning and wrangling data
+- [Cleaning and wrangling data](analysis/data-cleaning.html)
 - Data vis
 - Spatial data
 
