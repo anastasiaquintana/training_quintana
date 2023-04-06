@@ -1,0 +1,214 @@
+---
+title: "Intro to sf spatiotemporal data and maps"
+author: "Tasha Quintana"
+date: "2023-04-06"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load libraries
+
+```{r, message=FALSE, warning=FALSE}
+
+library(dplyr)
+library(readr)
+library(sf)
+library(leaflet)
+library(scales)
+library(ggplot2)
+library(ggmap) ## used for base maps, adding them to static maps
+
+```
+
+## AK Regional data
+
+```{r}
+
+ak_regions <- sf::read_sf("data/ak_regions_simp.shp")
+
+```
+
+## Explore data AK regions
+
+```{r}
+
+head(ak_regions)
+glimpse(ak_regions)
+plot(ak_regions)
+
+## Exploring spatial data
+st_crs(ak_regions)
+
+```
+
+## Transform CRS of `ak_regions`
+
+```{r}
+
+ak_regions_3338 <- ak_regions %>% 
+  st_transform(crs = 3338)
+## 3338 is the EPSG code for Alaska Albers
+  
+st_crs(ak_regions_3338)
+
+plot(ak_regions_3338)
+
+```
+
+## SF and the tidyverse
+
+```{r}
+
+colnames(ak_regions_3338)
+head(ak_regions_3338)
+
+ak_regions_3338 %>% 
+  select(region)
+
+```
+
+## Spatial joins
+
+```{r}
+
+pop <- read_csv("data/alaska_population.csv")
+class(pop)
+glimpse(pop)
+class(ak_regions)
+
+pop_4326 <- st_as_sf(pop,
+                     coords = c("lng", "lat"),
+                     crs = 4326,
+                     remove = FALSE)
+
+class(pop_4326)
+
+plot(pop_4326)
+
+```
+
+Pop joining
+
+```{r pop join}
+
+pop_3338 <- st_transform(pop_4326, crs = 3338)
+st_crs(pop_3338)
+
+pop_joined <- st_join(pop_3338, ak_regions_3338, join = st_within)
+
+```
+
+For group by and summarize, converting to dataframe
+
+```{r}
+
+pop_region <- pop_joined %>% 
+  as.data.frame() %>% 
+  group_by(region) %>% 
+  summarize(total_pop = sum(population))
+
+head(pop_region)
+
+pop_region_3338 <- left_join(ak_regions_3338, pop_region, by = "region")
+
+colnames(pop_region)
+colnames(ak_regions_3338)
+
+```
+
+# Plotting all this
+
+```{r}
+
+colnames(pop_region_3338)
+plot(pop_region_3338["total_pop"])
+
+```
+
+# Plotting management areas
+
+```{r}
+
+pop_mgmt_3338 <- pop_region_3338 %>% 
+  group_by(mgmt_area) %>% 
+  summarize(total_pop = sum(total_pop), do_union = FALSE)
+
+plot(pop_mgmt_3338["total_pop"])
+
+```
+
+## Writing an sf file using `write_sf`
+
+```{r}
+
+write_sf(pop_region_3338, "data/ak_regions_population.shp")
+
+```
+
+```{r}
+ggplot(pop_region_3338)+
+  geom_sf(aes(fill = total_pop))+
+  labs(fill = "Total Population")+
+  scale_fill_continuous(labels = comma,
+                        low = "khaki",
+                        high = "firebrick")+
+  theme_bw()
+
+```
+
+## Rivers spatial data
+
+```{r}
+
+rivers <- read_sf("data/ak_rivers_simp.shp")
+st_crs(rivers)
+rivers_3338 <- read_sf("data/ak_rivers_simp.shp")
+st_crs(rivers_3338)
+
+ggplot()+
+  geom_sf(pop_region_3338, mapping=aes(fill = total_pop))+
+  scale_fill_continuous(labels = comma,
+                        low = "khaki",
+                        high = "firebrick")+
+  labs(fill = "Total Population",
+       title = "Map of Alaska Populations, Rivers, and Cities")+
+  geom_sf(pop_3338, mapping=aes(), color = "darkseagreen4", size = 0.5)+
+  geom_sf(rivers_3338, mapping=aes(linewidth = StrOrder))+
+  scale_linewidth(range = c(0.05,0.5), guide = "none")+
+  theme_bw()
+```
+
+
+# Leaflet interactive maps
+
+```{r}
+
+epsg3338 <- leaflet::leafletCRS(
+    crsClass = "L.Proj.CRS",
+    code = "EPSG:3338",
+    proj4def =  "+proj=aea +lat_1=55 +lat_2=65 +lat_0=50 +lon_0=-154 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+    resolutions = 2 ^ (16:7)
+)
+
+```
+
+```{r}
+
+pop_region_4326 <- pop_region_3338 %>% st_transform(crs = 4326)
+
+```
+
+```{r}
+
+n <- leaflet(options = leafletOptions(crs = epsg3338)) %>% 
+  addPolygons(data = pop_region_4326,
+             fillColor = "firebrick",
+             weight = 1)
+
+n
+
+```
+
